@@ -11,9 +11,9 @@
 // POSIX systems are the majority of systems both running and created so it's okay
 #include "DiscordPresenceRpc.h"
 
-static void setAppSend(const char* app, DiscordRichPresence& payload, DiscordPresenceRpc& rpc)
+static void setAppSend(DiscordRichPresence& payload, DiscordPresenceRpc& rpc)
 {
-    rpc.setApp(app);
+    //rpc.setApp(app);
     rpc.send(payload);
 }
 
@@ -22,31 +22,24 @@ static DiscordRichPresence getPresenceForTrack(const TrackInfo& track)
     DiscordRichPresence payload = {};
     
     payload.partySize = track.TrackNumber;
-    //payload.partyMax = track.TotalTracks;
     payload.state = track.Artist.c_str();
     payload.details = track.TrackName.c_str();
     payload.startTimestamp = time(0) - track.PlayTimeSeconds;
-    //payload.largeImageKey = "mpd_large";
+    payload.largeImageKey = "mpd_large";
     
     return payload;
 }
 
-/**void sendIdle(DiscordPresenceRpc& rpc)
+void sendIdle(DiscordPresenceRpc& rpc)
 {
-    const char* appIdle = "382302420073709568";
-    
     DiscordRichPresence p = {};
     p.details = "Idle";
     p.largeImageKey = "mpd_large";
-    setAppSend(appIdle, p, rpc);
-}**/
+    setAppSend(p, rpc);
+}
 
 void updatePresence(MpdClient& mpd, DiscordPresenceRpc& rpc)
 {
-    const char* appPlaying = "467392684324290561";
-    //const char* appPlaying = "381948295830044683";
-    //const char* appPaused = "467392684324290561";
-    
     MpdClient::State state = mpd.getState();
     switch(state)
     {
@@ -61,17 +54,17 @@ void updatePresence(MpdClient& mpd, DiscordPresenceRpc& rpc)
                 std::string paused = track.TrackName + " (Paused)";
                 char *cstr = &paused[0u];
                 p.details = cstr;
-                setAppSend(appPlaying, p, rpc);
+                setAppSend(p, rpc);
                 break;
             } 
-            setAppSend(appPlaying, p, rpc);
+            setAppSend(p, rpc);
             break;
         }
         case MpdClient::Idle:
         {
-            /**if(rpc.shouldBroadcastIdle()) {
+            if(rpc.shouldBroadcastIdle()) {
                 sendIdle(rpc);
-            }**/
+            }
             //else
                 rpc.shutdown();
 
@@ -139,9 +132,10 @@ int main(int argc, char** args)
     auto host = getHostname(vecArgs);
     auto pass = getPassword(vecArgs);
     auto port = getPort(vecArgs);
-    
+    const char* app = "467392684324290561";
     bool isForked = false;
     int pid;
+    
     if(std::find(vecArgs.begin(), vecArgs.end(), "--fork") != vecArgs.end())
     {
         pid = fork();
@@ -162,7 +156,7 @@ int main(int argc, char** args)
     }
     
     DiscordPresenceRpc rpc(shouldBroadcastIdle(vecArgs));
-
+    rpc.setApp(app);
     int count = 0;
     const static int MaxExceptionsWhenForked = 10;
     
