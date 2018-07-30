@@ -48,7 +48,7 @@ void updatePresence(MpdClient& mpd, DiscordPresenceRpc& rpc)
         {
             auto track = mpd.getCurrentTrack();
             auto p = getPresenceForTrack(track);
-           if(state == MpdClient::Paused)
+            if(state == MpdClient::Paused)
             {
                 p.startTimestamp = 0;
                 std::string paused = track.TrackName + " (Paused)";
@@ -65,7 +65,7 @@ void updatePresence(MpdClient& mpd, DiscordPresenceRpc& rpc)
             if(rpc.shouldBroadcastIdle()) {
                 sendIdle(rpc);
             }
-            //else
+            else
                 rpc.shutdown();
 
             break;
@@ -156,7 +156,7 @@ int main(int argc, char** args)
     }
     
     DiscordPresenceRpc rpc(shouldBroadcastIdle(vecArgs));
-    rpc.setApp(app);
+    
     int count = 0;
     const static int MaxExceptionsWhenForked = 10;
     
@@ -166,7 +166,7 @@ int main(int argc, char** args)
         {
             MpdClient mpd(host, port);
             mpd.connect(pass);
-            
+            rpc.setApp(app);
             while(true)
             {
                 updatePresence(mpd, rpc);
