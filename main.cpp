@@ -25,7 +25,7 @@ static DiscordRichPresence getPresenceForTrack(const TrackInfo& track)
     payload.state = track.Artist.c_str();
     payload.details = track.TrackName.c_str();
     payload.startTimestamp = time(0) - track.PlayTimeSeconds;
-    payload.largeImageKey = "mpd_small";
+    payload.largeImageKey = "mpd_large";
     
     return payload;
 }
