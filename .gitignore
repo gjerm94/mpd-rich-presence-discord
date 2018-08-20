@@ -5,3 +5,4 @@ release/
 debug/
 build/
 thirdparty/
+.vscode/

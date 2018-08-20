@@ -99,11 +99,12 @@ std::string createTitle(mpd_song_t* song)
 {
     std::stringstream stream;
     
+    const char* artist = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
     const char* name = mpd_song_get_tag(song, MPD_TAG_NAME, 0);
     const char* uri = mpd_song_get_uri(song);
     const char* title = mpd_song_get_tag(song, MPD_TAG_TITLE, 0);
     if(title)
-        stream << title;
+        stream << artist << " - " << title;
     else if(name)
         stream << name;
     else if(uri)
@@ -114,20 +115,16 @@ std::string createTitle(mpd_song_t* song)
     RET_CLAMP_STRSTREAM(stream);
 }
 
-std::string createArtist(mpd_song_t* song)
+std::string createAlbum(mpd_song_t* song)
 {
     std::stringstream stream;
     
-    const char* artist = mpd_song_get_tag(song, MPD_TAG_ARTIST, 0);
+    
     const char* album = mpd_song_get_tag(song, MPD_TAG_ALBUM, 0);
-    if(artist)
-        stream << "by " << artist;
     if(album)
-    {
-        if(artist) stream << " (";
-        stream << "album: " << album;
-        if(artist) stream << ")";
-    }
+        stream << "Album: " << album;
+    else
+        stream << "Unknown";
     
     RET_CLAMP_STRSTREAM(stream);
 }
@@ -149,7 +146,7 @@ TrackInfo MpdClient::getCurrentTrack()
     t.TotalTracks = mpd_status_get_queue_length(mpdStatus);
     t.TrackNumber = mpd_status_get_song_pos(mpdStatus) + 1;
     t.PlayTimeSeconds = mpd_status_get_elapsed_time(mpdStatus);
-    t.Artist = createArtist(mpdCurrentSong);
+    t.Album = createAlbum(mpdCurrentSong);
     t.TrackName = createTitle(mpdCurrentSong);
     
     mpd_song_free(mpdCurrentSong);
